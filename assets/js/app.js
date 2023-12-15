@@ -3,7 +3,6 @@
 import { fetchData, url } from "./api.js";
 import * as module from "./module.js";
 // const { exec } = require('child_process');
-const axios = require('axios');
 
 
 
@@ -419,27 +418,24 @@ export const updateWeather = function (lat, lon) {
         const pythonScript = '../python/predict.py';
         let temperature;
 
-        // // Wrap the exec call in a Promise
-        // const executePythonScript = () => {
-        //   return new Promise((resolve, reject) => {
-        //       exec(` python ${pythonScript} ${humidity} ${speed} ${deg} ${visibility} ${pressure}`, (error, stdout, stderr) => {
-        //           if (error) {
-        //               reject(`Error: ${error.message}`);
-        //               return;
-        //           }
-        //           resolve(stdout);
-        //       });
-        //   });
-        // };
+        // This function makes a GET request to the Node.js server
+        function callPythonScript(humidity, speed, deg, visibility, pressure) {
+          // Configure the URL for the GET request
+          return new Promise((resolve, reject) => {
+            const url = `http://localhost:3029/`;
 
-        // // Call the function and handle the result
-        // executePythonScript()
-        //   .then((res) => {
-        //     temperature = res;
-        //   })
-        //   .catch((error) => {
-        //       alert(error.message);
-        //   });
+            // Make the GET request using fetch
+            fetch(url)
+                .then(response => response.text()) // Parse the response as text
+                .then(data => {
+                    // Save the response to the variable "temp_max"
+                    temp_max = data;
+                })
+                .catch(error => console.error('Error:', error));
+          });
+        }
+
+        callPythonScript(pressure, humidity, speed, deg, visibility)
 
         const li = document.createElement("li");
         li.classList.add("card-item");
