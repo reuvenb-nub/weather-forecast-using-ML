@@ -1,8 +1,10 @@
-const express = require('express');
-const { exec } = require('child_process');
+const express = require("express");
+const { exec } = require("child_process");
+var cors = require("cors");
+var bodyParser = require("body-parser");
 
 // Replace 'example.py' with your Python script
-const pythonScript = 'predict.py';
+const pythonScript = "predict.py";
 
 // Parameters to pass to the Python script
 const a = 83;
@@ -14,31 +16,62 @@ const e = 909;
 const app = express();
 const port = 3029;
 
+app.use(cors());
+app.use(bodyParser.json());
+
 // Wrap the exec call in a Promise
-const executePythonScript = (pythonScript, humidity, speed, deg, visibility, pressure) => {
+const executePythonScript = (
+  pythonScript,
+  humidity,
+  speed,
+  deg,
+  visibility,
+  pressure
+) => {
   return new Promise((resolve, reject) => {
-    exec(`python ${pythonScript} ${humidity} ${speed} ${deg} ${visibility} ${pressure}`, (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error: ${error.message}`);
-        return;
+    exec(
+      `python ${pythonScript} ${humidity} ${speed} ${deg} ${visibility} ${pressure}`,
+      (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error: ${error.message}`);
+          return;
+        }
+        resolve(stdout);
       }
-      console.log(stdout);
-      resolve(stdout);
-    });
+    );
   });
 };
 
-app.get('/', (req, res) => {
+app.get("/", async (req, res) => {
   // Call the function and handle the result
-  executePythonScript(pythonScript, a, b, c, d, e)
+  await executePythonScript(pythonScript, a, b, c, d, e)
     .then((result) => {
-        console.log(result);
+      console.log(result);
+
       res.send(result);
     })
     .catch((error) => {
-        console.error(error);
-        res.status(500).send(error.message);
+      console.error(error);
+      res.status(500).send(error.message);
+    });
+});
 
+app.post("/add", async (req, res) => {
+  // Call the function and handle the result
+  const a = req.body.humidity;
+  const b = req.body.speed;
+  const c = req.body.deg;
+  const d = req.body.visibility;
+  const e = req.body.pressure;
+
+  await executePythonScript(pythonScript, a, b, c, d, e)
+    .then((result) => {
+      console.log(result);
+      res.send(result);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(error.message);
     });
 });
 
